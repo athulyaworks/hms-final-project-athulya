@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Prescriptions</h2>
+  <a href="{% url 'pharmacy:create-prescription' %}" class="btn btn-success mb-3">New Prescription</a>
+
+  {% if prescriptions %}
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Patient</th>
+        <th>Doctor</th>
+        <th>Date Issued</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for prescription in prescriptions %}
+      <tr>
+        <td>{{ prescription.patient.user.get_full_name }}</td>
+        <td>{{ prescription.doctor.user.get_full_name }}</td>
+        <td>{{ prescription.date_issued }}</td>
+        <td>{{ prescription.notes|default:"-" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No prescriptions found.</p>
+  {% endif %}
+</div>
+{% endblock %}

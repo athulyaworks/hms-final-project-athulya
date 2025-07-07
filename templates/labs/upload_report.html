@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Upload Lab Report for {{ object.patient.user.get_full_name }}</h2>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {% if form.errors %}
+    <div class="alert alert-danger">
+      Please fix the errors below:
+      {{ form.errors }}
+    </div>
+  {% endif %}
+  {{ form.as_p }}
+  <button type="submit">Upload Report</button>
+</form>
+{% endblock %}

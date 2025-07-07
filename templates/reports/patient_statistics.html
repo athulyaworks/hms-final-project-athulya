@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>🧍‍♂️ Patient Statistics</h2>
+    <ul class="list-group mb-4">
+        <li class="list-group-item">Total Patients: {{ total }}</li>
+        <li class="list-group-item">Male: {{ male }}</li>
+        <li class="list-group-item">Female: {{ female }}</li>
+    </ul>
+
+    <h3>📊 Monthly Visit Trends</h3>
+    {% if monthly_visits %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Visit Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in monthly_visits %}
+                    <tr>
+                        <td>{{ item.month|date:"F Y" }}</td>
+                        <td>{{ item.count }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Charts -->
+        <canvas id="patientGenderChart" width="400" height="200"></canvas>
+        <canvas id="monthlyVisitsChart" width="600" height="300"></canvas>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+          const genderData = {
+            labels: ['Male', 'Female'],
+            datasets: [{
+              label: 'Patient Count',
+              data: [{{ male }}, {{ female }}],
+              backgroundColor: ['#36A2EB', '#FF6384'],
+              hoverOffset: 30
+            }]
+          };
+
+          const genderConfig = {
+            type: 'pie',
+            data: genderData,
+          };
+
+          const months = [
+  {% for item in monthly_visits %}
+    "{{ item.month|date:'F Y' }}"{% if not forloop.last %},{% endif %}
+  {% endfor %}
+];
+
+const visits = [
+  {% for item in monthly_visits %}
+    {{ item.count }}{% if not forloop.last %},{% endif %}
+  {% endfor %}
+];
+
+
+          const visitsData = {
+            labels: months,
+            datasets: [{
+              label: 'Monthly Visits',
+              data: visits,
+              fill: false,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1
+            }]
+          };
+
+          const visitsConfig = {
+            type: 'line',
+            data: visitsData,
+          };
+
+          const genderChart = new Chart(
+            document.getElementById('patientGenderChart'),
+            genderConfig
+          );
+
+          const visitsChart = new Chart(
+            document.getElementById('monthlyVisitsChart'),
+            visitsConfig
+          );
+        </script>
+    {% else %}
+        <p>No appointment data available for monthly trend.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>You have already submitted hospital feedback</h2>
+  <p>Thank you! Here is your feedback:</p>
+  <blockquote>
+    {{ feedback.feedback }}
+  </blockquote>
+  <p>Submitted on: {{ feedback.created_at|date:"F j, Y, g:i a" }}</p>
+
+  <a href="{% url 'hospital:patient-dashboard' %}">Back to Dashboard</a>
+{% endblock %}

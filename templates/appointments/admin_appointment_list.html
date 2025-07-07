@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">All Booked Appointments</h2>
+
+    {% if appointments %}
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Patient</th>
+                <th>Doctor</th>
+                <th>Specialization</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appointment in appointments %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ appointment.patient.user.get_full_name }}</td>
+                <td>Dr. {{ appointment.doctor.user.get_full_name }}</td>
+                <td>{{ appointment.doctor.specialization }}</td>
+                <td>{{ appointment.date }}</td>
+                <td>{{ appointment.time }}</td>
+                <td>{{ appointment.notes|default:"-" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No appointments found.</p>
+    {% endif %}
+</div>
+{% endblock %}

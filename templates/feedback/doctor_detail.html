@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Dr. {{ doctor.user.get_full_name }}</h2>
+    <p>Specialty: {{ doctor.specialization }}</p>
+
+    <h4>Average Rating: {{ avg_rating|floatformat:1 }}/5</h4>
+
+    <hr>
+    <h5>Patient Reviews:</h5>
+    {% if feedbacks %}
+        <ul class="list-group">
+            {% for feedback in feedbacks %}
+                <li class="list-group-item">
+                    <strong>{{ feedback.patient.user.get_full_name }}:</strong>
+                    ⭐ {{ feedback.rating }}<br>
+                    {{ feedback.comment }}<br>
+                    <small class="text-muted">{{ feedback.created_at|date:"M d, Y H:i" }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No feedback submitted yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

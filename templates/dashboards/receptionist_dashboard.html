@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 700px;">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h1 class="card-title mb-4">
+        Welcome, {{ user.get_full_name|default:user.username }}!
+      </h1>
+      <p class="lead">Manage hospital operations from here:</p>
+
+      <div class="list-group mt-4 mb-5">
+        <!-- Patient Management -->
+        <!-- <a href="{% url 'hospital:receptionist-patient-register' %}" class="list-group-item list-group-item-action">
+          📝 Register Patient
+        </a> -->
+        <a href="{% url 'hospital:patient-list' %}" class="list-group-item list-group-item-action">
+          👥 Patient List
+        </a>
+        <a href="{% url 'hospital:patient-checkin-list' %}" class="list-group-item list-group-item-action">
+          🏥 Patient Check-In/Out
+        </a>
+
+        <!-- Appointment Management -->
+        <a href="{% url 'hospital:appointments_page' %}" class="list-group-item list-group-item-action">
+          📅 Manage Appointments
+        </a>
+        <a href="{% url 'hospital:waiting-list' %}" class="list-group-item list-group-item-action">
+          ⏳ Manage Waiting List
+        </a>
+        <a href="{% url 'hospital:send-reminders' %}" class="list-group-item list-group-item-action">
+          📧 Send SMS/Email Reminders
+        </a>
+
+        <!-- Billing -->
+        <a href="{% url 'manage-bills' %}" class="list-group-item list-group-item-action">
+          💰 Manage Billing
+        </a>
+
+        <!-- Inpatient Management -->
+        <a href="{% url 'hospital:admin_inpatients' %}" class="list-group-item list-group-item-action">
+          🛏️ Inpatient Records
+        </a>
+        <a href="{% url 'hospital:admin_beds' %}" class="list-group-item list-group-item-action">
+          🚪 Bed Availability
+        </a>
+      </div>
+
+      <!-- Admission Requests Section -->
+      <h3 class="mb-3">📩 Admission Requests</h3>
+      {% if admission_requests %}
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Patient</th>
+                <th>Requested By</th>
+                <th>Requested On</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for req in admission_requests %}
+                <tr>
+                  <td>{{ req.patient.user.get_full_name }}</td>
+                  <td>{{ req.requested_by.get_full_name|default:req.requested_by.username }}</td>
+                  <td>{{ req.requested_at|date:"M d, Y H:i" }}</td>
+                  <td>
+                    {% if req.is_processed %}
+                      {% if req.patient.is_inpatient %}
+                        <span class="badge bg-success">Admitted ✅</span>
+                      {% else %}
+                        <span class="badge bg-danger">Rejected ❌</span>
+                      {% endif %}
+                    {% else %}
+                      <span class="badge bg-warning text-dark">Pending</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if not req.is_processed %}
+                      <form method="post" action="{% url 'process-admission-request' req.id 'accept' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-success">Accept</button>
+                      </form>
+                      <form method="post" action="{% url 'process-admission-request' req.id 'reject' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                      </form>
+                    {% else %}
+                      <span class="text-muted">No actions available</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-muted">No admission requests pending.</p>
+      {% endif %}
+
+      <!-- Bed Assignment Section (only if context has 'assign_bed') -->
+      {% if assign_bed and patient and available_beds %}
+      <hr class="my-5">
+      <h3>🛏️ Assign Bed for {{ patient.user.get_full_name }}</h3>
+      <form method="post" action="{% url 'assign-bed-admit' patient.id %}">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="bed" class="form-label">Select Bed:</label>
+          <select name="bed" id="bed" class="form-select">
+            {% for bed in available_beds %}
+              <option value="{{ bed.id }}">{{ bed.get_type_display }} - Bed {{ bed.number }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn-success">Confirm Admission</button>
+      </form>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}

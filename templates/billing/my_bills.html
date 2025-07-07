@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">💳 My Bills</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% if invoices %}
+        <table class="table table-bordered table-striped">
+            <thead class="table-light">
+                <tr>
+                    <th>#ID</th>
+                    <th>Date</th>
+                    <th>Total (₹)</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                    <tr>
+                        <td>{{ invoice.id }}</td>
+                        <td>{{ invoice.date|date:"Y-m-d H:i" }}</td>
+                        <td>{{ invoice.total_amount }}</td>
+                        <td>
+                            {% if invoice.is_paid %}
+                                <span class="badge bg-success">Paid</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if not invoice.is_paid %}
+                                <a href="{% url 'billing:mock-payment' invoice.id %}" class="btn btn-sm btn-primary">Pay Now</a>
+
+                            {% else %}
+                                <span class="text-success">✔ Paid</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info">No invoices found.</div>
+    {% endif %}
+</div>
+{% endblock %}

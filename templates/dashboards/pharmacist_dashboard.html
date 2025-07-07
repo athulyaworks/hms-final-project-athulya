@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load math_filters %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title">💊 Pharmacist Dashboard</h2>
+
+            {% if messages %}
+            <div>
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if low_stock_medicines %}
+            <div class="alert alert-warning" role="alert">
+                ⚠️ There are {{ low_stock_medicines|length }} medicines low in stock! Please restock soon.
+            </div>
+            {% endif %}
+
+            <a href="{% url 'hospital:pharmacist-patient-list' %}" class="btn btn-outline-primary mb-3">
+                <i class="bi bi-people"></i> View Patients
+            </a>
+
+            <div class="d-flex gap-2 flex-wrap mb-4">
+                <a href="{% url 'pharmacy:prescription-list' %}" class="btn btn-outline-info">
+                    📋 View Prescriptions
+                </a>
+                <a href="{% url 'billing:create-invoice-from-prescription' %}" class="btn btn-outline-success">
+                    💰 Create Invoice from Prescription
+                </a>
+                <a href="{% url 'billing:manage-bills' %}" class="btn btn-outline-secondary">
+                    🧾 Manage Bills
+                </a>
+            </div>
+
+            <h4 class="mt-4">⚠️ Low Stock Medicines</h4>
+            {% if low_stock_medicines %}
+                <ul class="list-group mb-4">
+                    {% for med in low_stock_medicines %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ med.name }} 
+                            <span class="badge bg-danger rounded-pill">{{ med.stock }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No low stock medicines.</p>
+            {% endif %}
+
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <h4>📦 Inventory</h4>
+                <a href="{% url 'pharmacy:add-medicine' %}" class="btn btn-sm btn-outline-primary">
+                    ➕ Add New Medicine
+                </a>
+            </div>
+
+            {% if all_medicines %}
+                <div class="table-responsive mt-3">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Medicine</th>
+                                <th>Stock</th>
+                                <th>Max Stock</th>
+                                <th>Stock Level</th>
+                                <th>Price (₹)</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for med in all_medicines %}
+                            <tr>
+                                <td>{{ med.name }}</td>
+                                <td>{{ med.stock }}</td>
+                                <td>{{ med.max_stock }}</td>
+                                <td style="min-width: 150px;">
+                                    {% if med.max_stock > 0 %}
+                                        {% with percent=med.stock|div:med.max_stock|mul:100 %}
+                                        <div class="progress" style="height: 15px;">
+                                            <div class="progress-bar
+                                                {% if percent <= 25 %} bg-danger
+                                                {% elif percent <= 50 %} bg-warning
+                                                {% else %} bg-success
+                                                {% endif %}"
+                                                role="progressbar"
+                                                style="width: {{ percent|floatformat:0 }}%;">
+                                                {{ percent|floatformat:0 }}%
+                                            </div>
+                                        </div>
+                                        {% endwith %}
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ med.price }}</td>
+                                <td>
+                                    <a href="{% url 'pharmacy:restock-medicine' med.id %}" class="btn btn-sm btn-outline-success">
+                                        ➕ Restock
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No medicines in inventory.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 500px;">
+    <div class="card shadow">
+        <div class="card-body">
+            <h2 class="card-title mb-4 text-center">Login to Medinex</h2>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+                
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="text-danger small">{{ field.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+
+            <p class="mt-3 text-center">
+                Not a patient? Staff must contact admin for account setup.<br>
+                <a href="{% url 'users:register' %}">New patient? Register here</a>
+            </p>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'users:home' %}" class="btn btn-secondary">🏠 Back to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

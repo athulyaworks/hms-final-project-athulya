@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Your Appointments</h2>
+
+    {% if appointments %}
+        <table class="table table-bordered table-striped">
+            <thead class="table-light">
+                <tr>
+                    <th>Doctor</th>
+                    <th>Department</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Notes</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                <tr class="{% if appointment.status == 'cancelled' %}table-danger{% endif %}">
+                    <td>{{ appointment.doctor.user.get_full_name }}</td>
+                    <td>{{ appointment.doctor.specialization }}</td>
+                    <td>{{ appointment.date }}</td>
+                    <td>{{ appointment.time }}</td>
+                    <td>{{ appointment.notes|default:"-" }}</td>
+                    <td>
+                        {% if appointment.status == 'cancelled' %}
+                            <span class="badge bg-danger">Cancelled</span>
+                        {% elif appointment.status == 'completed' %}
+                            <span class="badge bg-success">Completed</span>
+                        {% else %}
+                            <span class="badge bg-primary">Scheduled</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if appointment.status == 'scheduled' %}
+                            <a href="{% url 'hospital:reschedule-appointment' appointment.id %}" class="btn btn-sm btn-warning me-1">Reschedule</a>
+                            <a href="{% url 'hospital:cancel-appointment' appointment.id %}" class="btn btn-sm btn-danger"
+                               onclick="return confirm('Are you sure you want to cancel this appointment?');">Cancel</a>
+                        {% else %}
+                            <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="text-muted">You have no appointments scheduled.</p>
+    {% endif %}
+
+    <a href="{% url 'hospital:patient-dashboard' %}" class="btn btn-secondary mt-3">← Back to Dashboard</a>
+</div>
+{% endblock %}

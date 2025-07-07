@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<!-- Hero Section -->
+<div class="text-white text-center d-flex align-items-center justify-content-center" 
+     style="height: 400px; background: url('{% static "images/hospital_banner.jpg" %}') center/cover no-repeat;">
+    <div>
+        <h1 class="display-4 fw-bold">Welcome to Medinex Hospital</h1>
+        <p class="lead">Trusted Care. Advanced Technology. Compassionate Healing.</p>
+    </div>
+</div>
+
+<!-- Patient & Staff Access -->
+<div class="container my-5">
+    <div class="row text-center">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-body">
+                    <h3><i class="bi bi-person-heart text-danger me-2"></i>Patient Access</h3>
+                    <p>Register or login to manage appointments, reports and more.</p>
+                    <a href="{% url 'users:register' %}" class="btn btn-success me-2">Register</a>
+                    <a href="{% url 'users:login' %}" class="btn btn-primary">Login</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-body">
+                    <h3><i class="bi bi-person-badge text-primary me-2"></i>Staff Access</h3>
+                    <p>Admins, Doctors, and other staff login here.</p>
+                    <a href="{% url 'users:login' %}" class="btn btn-primary">Staff Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Services / Features -->
+<div class="container my-5">
+    <h2 class="text-center mb-4">Explore Our Services</h2>
+    <div class="row text-center">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow h-100">
+                <img src="{% static 'images/appointment.jpg' %}" class="card-img-top" alt="Appointments">
+                <div class="card-body">
+                    <h5 class="card-title">Appointments</h5>
+                    <p class="card-text">Book, reschedule and manage doctor visits online.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow h-100">
+                <img src="{% static 'images/lab_reports.avif' %}" class="card-img-top" alt="Lab Reports">
+                <div class="card-body">
+                    <h5 class="card-title">Lab Reports</h5>
+                    <p class="card-text">Upload, access and download your diagnostic reports.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card shadow h-100">
+                <img src="{% static 'images/pharmacy.avif' %}" class="card-img-top" alt="Pharmacy">
+                <div class="card-body">
+                    <h5 class="card-title">Pharmacy</h5>
+                    <p class="card-text">Order medicines and manage prescriptions efficiently.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

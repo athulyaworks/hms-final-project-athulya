@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 600px;">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="card-title mb-4">➕ Add New Bed</h2>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary mt-3">Add Bed</button>
+        <a href="{% url 'hospital:admin_beds' %}" class="btn btn-secondary mt-3 ms-2">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

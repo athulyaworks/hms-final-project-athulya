@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Inventory</h2>
+
+{% if low_stock %}
+<div class="alert alert-warning">
+  ⚠️ Low stock on: {{ low_stock|join:", " }}
+</div>
+{% endif %}
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Medicine</th>
+      <th>Stock</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for med in medicines %}
+    <tr>
+      <td>{{ med.name }}</td>
+      <td>{{ med.stock }}</td>
+      <td><a href="{% url 'pharmacy:medicine-restock' med.pk %}">Restock</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

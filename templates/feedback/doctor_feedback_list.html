@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Doctor Feedback - Dr. {{ doctor.user.get_full_name }}</h2>
+
+    {% if feedbacks %}
+        <ul class="list-group mt-3">
+            {% for fb in feedbacks %}
+                <li class="list-group-item">
+                    <strong>{{ fb.patient.user.get_full_name }}</strong> rated 
+                    <span class="text-warning">{{ fb.rating }}/5</span><br>
+                    {{ fb.comment|linebreaksbr }}
+                    <div class="text-muted small mt-1">{{ fb.created_at|date:"M d, Y H:i" }}</div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No feedback available for this doctor yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

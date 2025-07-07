@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 600px;">
+    <h2>Book an Appointment</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mt-3">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" action="{% url 'hospital:book-appointment' %}" novalidate>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="mb-3">
+            <label for="{{ form.doctor.id_for_label }}" class="form-label">{{ form.doctor.label }}</label>
+            <select name="{{ form.doctor.name }}" class="form-select" id="{{ form.doctor.id_for_label }}">
+                {% for doctor in form.fields.doctor.queryset %}
+                    <option value="{{ doctor.id }}" {% if form.initial.doctor == doctor.id %}selected{% endif %}>
+                        Dr. {{ doctor.user.get_full_name }} — {{ doctor.specialization }}
+                    </option>
+                {% endfor %}
+            </select>
+            {{ form.doctor.errors }}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.date.id_for_label }}" class="form-label">{{ form.date.label }}</label>
+            {{ form.date }}
+            {{ form.date.errors }}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.time.id_for_label }}" class="form-label">{{ form.time.label }}</label>
+            {{ form.time }}
+            {{ form.time.errors }}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.notes.id_for_label }}" class="form-label">{{ form.notes.label }}</label>
+            {{ form.notes }}
+            {{ form.notes.errors }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Book Appointment</button>
+    </form>
+</div>
+{% endblock %}

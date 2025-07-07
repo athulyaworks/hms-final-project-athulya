@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2>Manage Inpatient Records</h2>
+
+  <p>Inpatients count: {{ inpatients|length }}</p>
+
+  {% if inpatients %}
+    <table class="table table-bordered table-hover">
+      <thead class="table-light">
+        <tr>
+          <th>Patient</th>
+          <th>Bed Number</th>
+          <th>Doctor</th>
+          <th>Admission Date</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ip in inpatients %}
+          <tr>
+            <td>
+              {{ ip.patient.user.get_full_name|default_if_none:"No Name" }}
+            </td>
+            <td>
+              {{ ip.bed.number|default_if_none:"Not Assigned" }}
+            </td>
+            <td>
+              {{ ip.doctor.user.get_full_name|default_if_none:"Not Assigned" }}
+            </td>
+            <td>
+              {{ ip.admission_date|date:"M d, Y" }}
+            </td>
+            <td>
+              {{ ip.notes|default_if_none:"-" }}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No current inpatient records found.</p>
+  {% endif %}
+</div>
+{% endblock %}

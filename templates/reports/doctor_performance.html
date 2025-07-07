@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>👨‍⚕️ Doctor Performance Report</h2>
+    <table class="table table-bordered mt-4">
+        <thead class="table-light">
+            <tr>
+                <th>Doctor</th>
+                <th>Total Appointments</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in performance_data %}
+                <tr>
+                    <td>{{ row.doctor__user__first_name }} {{ row.doctor__user__last_name }}</td>
+                    <td>{{ row.total_appointments }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

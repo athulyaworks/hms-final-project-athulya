@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1 class="mb-4">Welcome, Dr. {{ doctor.user.get_full_name }}</h1>
+
+  <div class="row">
+    <!-- Left side: Main content -->
+    <div class="col-lg-8">
+      <!-- Action Buttons -->
+      <div class="mb-4">
+        <a href="{% url 'labs:lab-test-request' %}" class="btn btn-primary me-2 mb-2">
+          Request Lab Test
+        </a>
+        <a href="{% url 'hospital:doctor-patient-list' %}" class="btn btn-outline-secondary me-2 mb-2">
+          View Patients
+        </a>
+      </div>
+
+      <!-- Patients List with Request Admission -->
+    <div class="mb-5">
+    <h4>My Patients</h4>
+    {% if patients %}
+        <ul class="list-group">
+        {% for patient in patients %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ patient.user.get_full_name }}</strong> - Age: {{ patient.age }} - Gender: {{ patient.gender }}
+            </div>
+            <div>
+                {% if patient.id in pending_admission_patient_ids %}
+                <span class="badge bg-info text-dark">Sent</span>
+                {% elif patient.is_inpatient %}
+                <span class="badge bg-success">Admitted</span>
+                {% else %}
+                <form method="post" action="{% url 'hospital:request-admission' patient.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-warning btn-sm">Request Admission</button>
+                </form>
+                {% endif %}
+            </div>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">You have no patients assigned.</p>
+    {% endif %}
+    </div>
+
+
+      <!-- Recent Prescriptions -->
+      <div class="mb-5">
+        <h4>Recent Prescriptions</h4>
+        {% if prescriptions %}
+          <ul class="list-group">
+            {% for prescription in prescriptions %}
+              <li class="list-group-item">
+                <strong>Patient:</strong> {{ prescription.patient.user.get_full_name }}<br>
+                <strong>Date:</strong> {{ prescription.created_at|date:"M d, Y" }}<br>
+                <strong>Comments:</strong> {{ prescription.comments|default:"No comments" }}<br>
+                {% if prescription.prescription_file %}
+                  <a href="{{ prescription.prescription_file.url }}" class="btn btn-sm btn-info mt-2" target="_blank">View Prescription</a>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted">No prescriptions uploaded yet.</p>
+        {% endif %}
+      </div>
+
+      <!-- Recent Lab Reports -->
+      <div class="mb-5">
+        <h4>Recent Lab Reports</h4>
+        {% if lab_tests %}
+          <ul class="list-group">
+            {% for test in lab_tests %}
+              <li class="list-group-item">
+                <strong>Patient:</strong> {{ test.patient.user.get_full_name }}<br>
+                <strong>Test:</strong> {{ test.get_test_type_display }}<br>
+                <strong>Uploaded:</strong> {{ test.uploaded_at|date:"M d, Y H:i" }}<br>
+                {% if test.report_file %}
+                  <a href="{{ test.report_file.url }}" class="btn btn-sm btn-success mt-2" target="_blank">View Report</a>
+                {% else %}
+                  <span class="badge bg-warning text-dark mt-2">No Report Uploaded</span>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted">No lab reports uploaded yet.</p>
+        {% endif %}
+      </div>
+
+      <!-- My Inpatients -->
+      <div class="mb-5">
+        <h4>My Inpatients</h4>
+        {% if inpatients %}
+          <ul class="list-group">
+            {% for ip in inpatients %}
+              <li class="list-group-item">
+                <strong>Patient:</strong> {{ ip.patient.user.get_full_name }}<br>
+                <strong>Bed:</strong> {{ ip.bed }}<br>
+                <strong>Admitted:</strong> {{ ip.admission_date }}<br>
+                <a href="{% url 'hospital:add-daily-note' ip.id %}" class="btn btn-sm btn-warning mt-2">Add Daily Note</a>
+                <a href="{% url 'hospital:add-treatment' ip.id %}" class="btn btn-sm btn-info mt-2">Add Treatment</a>
+                <a href="{% url 'hospital:add-procedure' ip.id %}" class="btn btn-sm btn-secondary mt-2">Add Procedure</a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted">You have no active inpatients.</p>
+        {% endif %}
+      </div>
+
+      <!-- Upcoming Appointments -->
+      <div>
+        <h4>Upcoming Appointments</h4>
+        {% if appointments %}
+          <ul class="list-group">
+            {% for appt in appointments %}
+              <li class="list-group-item">
+                <strong>Patient:</strong> {{ appt.patient.user.get_full_name }}<br>
+                <strong>Date:</strong> {{ appt.date }}<br>
+                <strong>Time:</strong> {{ appt.time }}<br>
+                {% if appt.notes %}
+                  <strong>Notes:</strong> {{ appt.notes }}<br>
+                {% endif %}
+                <a href="{% url 'hospital:prescription-upload' appt.id %}" class="btn btn-sm btn-success mt-2">
+                  Upload Prescription
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted">No upcoming appointments.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right side: Doctor Profile -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h4 class="card-title mb-3">Your Profile</h4>
+          <p><strong>Specialization:</strong> {{ doctor.specialization }}</p>
+          <p><strong>Qualifications:</strong> {{ doctor.qualifications }}</p>
+          <p><strong>Available Days:</strong> {{ doctor.available_days }}</p>
+          <p><strong>Available Time:</strong> 
+            {% if doctor.available_time_from and doctor.available_time_to %}
+              {{ doctor.available_time_from }} - {{ doctor.available_time_to }}
+            {% else %}
+              Not specified
+            {% endif %}
+          </p>
+          {% if doctor.photo %}
+            <img src="{{ doctor.photo.url }}" alt="Doctor Photo" class="img-fluid rounded mt-3" style="max-width:100%;">
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Waiting List</h2>
+  <table class="table">
+    <thead>
+      <tr><th>Patient</th><th>Doctor</th><th>Added On</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+      {% for entry in entries %}
+      <tr>
+        <td>{{ entry.patient.user.get_full_name }}</td>
+        <td>{{ entry.doctor.user.get_full_name }}</td>
+        <td>{{ entry.created_at|date:"M d, Y H:i" }}</td>
+        <td>
+          <a href="{% url 'remove-waiting-list-entry' entry.pk %}" class="btn btn-sm btn-danger">Remove</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4">No waiting list entries.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

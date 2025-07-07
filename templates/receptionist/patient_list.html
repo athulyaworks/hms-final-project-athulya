@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 700px;">
+  <h2>Patient List</h2>
+
+  <form method="get" class="mb-3">
+    <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Search patients..." class="form-control" />
+    <button type="submit" class="btn btn-primary mt-2">Search</button>
+  </form>
+
+  {% if patients %}
+    <ul class="list-group">
+      {% for patient in patients %}
+        <li class="list-group-item">
+          <a href="{% url 'hospital:patient-detail' patient.pk %}">
+            {{ patient.user.get_full_name }} ({{ patient.user.username }})
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No patients found.</p>
+  {% endif %}
+</div>
+{% endblock %}

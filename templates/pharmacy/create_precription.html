@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 700px;">
+    <h2>Create Prescription</h2>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form|crispy }}
+
+        <h5 class="mt-4">Medicines</h5>
+        {{ formset.management_form }}
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Medicine</th>
+                    <th>Quantity</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in formset.forms %}
+                <tr>
+                    <td>{{ form.medicine }}</td>
+                    <td>{{ form.quantity }}</td>
+                    <td>
+                        {% if form.instance.pk %}
+                        {{ form.DELETE }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <button type="submit" class="btn btn-primary">Save Prescription</button>
+        <a href="{% url 'prescription-list' %}" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+</div>
+{% endblock %}

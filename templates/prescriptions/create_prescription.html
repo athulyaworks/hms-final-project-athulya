@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Create Prescription</h2>
+  
+  {% if messages %}
+  <div>
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    
+    <div class="mb-3">
+      {{ form.patient.label_tag }}<br>
+      {{ form.patient }}
+      {{ form.patient.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.doctor.label_tag }}<br>
+      {{ form.doctor }}
+      {{ form.doctor.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.notes.label_tag }}<br>
+      {{ form.notes }}
+      {{ form.notes.errors }}
+    </div>
+    
+    <h4>Medicines</h4>
+    {{ formset.management_form }}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Medicine</th>
+          <th>Quantity</th>
+          <th>Delete?</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for form in formset %}
+        <tr>
+          <td>
+            {{ form.medicine }}
+            {{ form.medicine.errors }}
+          </td>
+          <td>
+            {{ form.quantity }}
+            {{ form.quantity.errors }}
+          </td>
+          <td>
+            {% if form.instance.pk %}
+              {{ form.DELETE }}
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <button type="submit" class="btn btn-primary">Save Prescription</button>
+  </form>
+</div>
+{% endblock %}

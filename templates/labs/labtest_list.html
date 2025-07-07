@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Lab Technician Dashboard</h2>
+        <a href="?pending={% if show_pending %}0{% else %}1{% endif %}" class="btn btn-outline-primary">
+            {% if show_pending %}Show All{% else %}Show Only Pending{% endif %}
+        </a>
+    </div>
+
+    <ul class="list-group">
+        {% for test in tests %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ test.patient.user.get_full_name }} - {{ test.get_test_type_display }}
+                <a href="{% url 'labs:upload-report' test.pk %}" class="btn btn-sm btn-success">Upload Report</a>
+            </li>
+        {% empty %}
+            <li class="list-group-item">No pending tests.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

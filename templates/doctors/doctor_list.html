@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2>Doctor List</h2>
+  <table class="table table-striped mt-3">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Specialization</th>
+        <th>Qualifications</th>
+        <th>Available Days</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for doctor in doctors %}
+      <tr>
+        <td>{{ doctor.user.username }}</td>
+        <td>{{ doctor.user.email }}</td>
+        <td>{{ doctor.specialization }}</td>
+        <td>{{ doctor.qualifications }}</td>
+        <td>{{ doctor.available_days }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">No doctors found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Our Expert Doctors</h2>
+  <div class="row">
+    {% for doctor in doctors %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm">
+        {% if doctor.photo %}
+        <img src="{{ doctor.photo }}" class="card-img-top" alt="{{ doctor.user.first_name }} {{ doctor.user.last_name }}">
+        {% else %}
+        <img src="{% static 'images/default_doctor.jpg' %}" class="card-img-top" alt="Doctor Image">
+        {% endif %}
+        <div class="card-body text-center">
+          <h5 class="card-title">{{ doctor.user.first_name }} {{ doctor.user.last_name }}</h5>
+          <p class="text-muted">{{ doctor.specialization }}</p>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-center">No doctors available.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Contact Us</h2>
+
+    {% if success %}
+        <div class="alert alert-success">Your message has been sent successfully.</div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-primary mt-2">Send Message</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h1 class="card-title mb-4">Welcome, {{ patient.user.first_name }}!</h1>
+            <p class="lead">Access your patient dashboard below:</p>
+
+            <!-- Medical History -->
+            <h3>Medical History:</h3>
+            {% if patient.medical_history %}
+                <p>{{ patient.medical_history|linebreaksbr }}</p>
+            {% else %}
+                <p>No medical history available.</p>
+            {% endif %}
+
+            
+            <!-- Upcoming Appointments -->
+<h3>Your Upcoming Appointments:</h3>
+{% if appointments %}
+    <ul class="list-group mb-4">
+        {% for appointment in appointments %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                📅 {{ appointment.date }} at {{ appointment.time }} with Dr. {{ appointment.doctor.user.get_full_name }}
+                
+                <div>
+                    <a href="{% url 'hospital:reschedule-appointment' appointment.id %}" class="btn btn-sm btn-warning me-2">✏️ Edit</a>
+
+                    <form action="{% url 'hospital:cancel-appointment' appointment.id %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger me-2" onclick="return confirm('Are you sure you want to cancel this appointment?');">
+                            🗑️ Delete
+                        </button>
+                    </form>
+
+                    <a href="{% url 'feedback:doctor-feedback' appointment.doctor.id %}" class="btn btn-sm btn-outline-primary">
+                        ⭐ Rate
+                    </a>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>You have no upcoming appointments.</p>
+{% endif %}
+
+
+            <!-- Inpatient Status -->
+            <h3>Inpatient Status:</h3>
+            {% if current_inpatient %}
+                <p>You are currently admitted since <strong>{{ current_inpatient.admission_date }}</strong> in bed <strong>{{ current_inpatient.bed }}</strong>.</p>
+
+                <!-- Assigned Doctor -->
+                <p>Attending Doctor: <strong>{{ current_inpatient.doctor.user.get_full_name }}</strong></p>
+
+                <!-- Assigned Staff -->
+                {% if current_inpatient.assigned_staff.all %}
+                    <p>Assigned Staff:</p>
+                    <ul>
+                        {% for staff in current_inpatient.assigned_staff.all %}
+                            <li>{{ staff.get_full_name }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <!-- Treatments -->
+                <h4>Treatments:</h4>
+                {% if current_inpatient.treatments.all %}
+                    <ul class="list-group mb-3">
+                        {% for treatment in current_inpatient.treatments.all %}
+                            <li class="list-group-item">
+                                <strong>{{ treatment.date }}:</strong> {{ treatment.description }}
+                                {% if treatment.notes %}
+                                    <br><em>Notes: {{ treatment.notes }}</em>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No treatments recorded yet.</p>
+                {% endif %}
+
+                <!-- Daily Notes -->
+                <h4>Daily Treatment Notes:</h4>
+                {% if current_inpatient.daily_notes.all %}
+                    <ul class="list-group mb-3">
+                        {% for note in current_inpatient.daily_notes.all %}
+                            <li class="list-group-item">
+                                <strong>{{ note.note_date }} {{ note.note_time|time:"H:i" }} by {{ note.author.get_full_name|default:"Unknown" }}</strong>
+                                <p>{{ note.content }}</p>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No daily notes available.</p>
+                {% endif %}
+            {% else %}
+                <p>You are not currently admitted.</p>
+            {% endif %}
+
+            <!-- Bills & Payments -->
+           <h4>Bills & Payments:</h4>
+        {% if unpaid_invoices.exists %}
+            <div class="alert alert-warning" role="alert">
+                ⚠️ You have <strong>{{ unpaid_invoices.count }}</strong> unpaid bill{{ unpaid_invoices.count|pluralize }}. Please settle them promptly.
+            </div>
+            <ul class="list-group mb-4">
+                {% for invoice in unpaid_invoices %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Invoice #{{ invoice.id }} – Amount: ₹{{ invoice.total_amount }} – Due: {{ invoice.due_date|default:"N/A" }}
+                        <a href="{% url 'billing:mock-payment' invoice.id %}" class="btn btn-primary btn-sm">Pay Now</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-success" role="alert">
+                ✅ All your bills are paid. Thank you!
+            </div>
+        {% endif %}
+
+
+            <!-- View all bills link -->
+            <a href="{% url 'billing:my-bills' %}" class="btn btn-info mt-2">View All Bills</a>
+
+            <!-- Navigation Links -->
+            <div class="list-group mt-4">
+                <a href="{% url 'hospital:book-appointment' %}" class="list-group-item list-group-item-action">
+                    📅 Book Appointment
+                </a>
+                <a href="{% url 'hospital:appointments_list' %}" class="list-group-item list-group-item-action">
+                    📋 View All Appointments
+                </a>
+            </div>
+
+            <!-- Feedback Section -->
+            <h4 class="mt-4">📢 Feedback</h4>
+            <ul class="list-group mb-4">
+                <li class="list-group-item">
+                    <a href="{% url 'feedback:hospital-feedback' %}">
+                        🏥 Submit Hospital Feedback
+                    </a>
+                </li>
+                <li class="list-group-item">
+                    ⭐ You can rate a doctor from your appointment list above.
+                </li>
+            </ul>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

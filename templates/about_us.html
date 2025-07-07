@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 40px auto; padding: 20px; font-family: Arial, sans-serif;">
+
+  <h1 style="text-align: center; margin-bottom: 30px;">About Us</h1>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: center;">
+
+    <div style="flex: 1 1 300px;">
+      <img src="{% static 'images/hospital_team.jpg' %}" alt="Hospital Team" style="width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+    </div>
+
+    <div style="flex: 1 1 400px;">
+      <p style="font-size: 1.1rem; line-height: 1.6; color: #333;">
+        Welcome to our Hospital Management System! Our mission is to provide seamless, reliable, and secure healthcare management through cutting-edge technology.
+        <br><br>
+        We are committed to improving patient care, streamlining hospital operations, and empowering healthcare professionals with efficient tools.
+        <br><br>
+        Thank you for trusting us to be part of your healthcare journey.
+      </p>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

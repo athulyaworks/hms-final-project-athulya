@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="alert alert-danger text-center">
+    <h3>Access Denied</h3>
+    <p>Sorry, you cannot view the feedback for Dr. {{ doctor.user.get_full_name }} because you have not had any appointments with this doctor.</p>
+    <a href="{% url 'patient-dashboard' %}" class="btn btn-primary mt-3">Go to Dashboard</a>
+  </div>
+</div>
+{% endblock %}

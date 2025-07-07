@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Rate Dr. {{ doctor.user.get_full_name }}</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="id_rating" class="form-label">Rating (1 to 5):</label>
+      {{ form.rating }}
+      {% if form.rating.errors %}
+        <div class="text-danger">{{ form.rating.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label for="id_comment" class="form-label">Comment (optional):</label>
+      {{ form.comment }}
+      {% if form.comment.errors %}
+        <div class="text-danger">{{ form.comment.errors }}</div>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit Feedback</button>
+  </form>
+</div>
+{% endblock %}

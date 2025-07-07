@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>📦 Inventory Report</h2>
+
+    <h4>All Medicines</h4>
+    <table class="table table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>Name</th>
+                <th>Stock</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for med in medicines %}
+                <tr>
+                    <td>{{ med.name }}</td>
+                    <td>{{ med.stock }}</td>
+                    <td>₹{{ med.price }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h4 class="mt-4 text-danger">⚠️ Low Stock Medicines</h4>
+    {% if low_stock %}
+        <ul class="list-group">
+            {% for med in low_stock %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ med.name }}
+                    <span class="badge bg-danger rounded-pill">{{ med.stock }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-success">All medicines sufficiently stocked.</p>
+    {% endif %}
+</div>
+{% endblock %}

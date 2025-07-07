@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Dashboard</h2>
+<div class="row">
+  <div class="col-md-4">
+    <div class="card text-white bg-info mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Total Patients</h5>
+        <p class="card-text" id="totalPatients">...</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-white bg-success mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Total Revenue</h5>
+        <p class="card-text" id="totalRevenue">...</p>
+      </div>
+    </div>
+  </div>
+</div>
+<h4 class="mt-5">Monthly Revenue</h4>
+<canvas id="revenueChart" width="400" height="150"></canvas>
+<script>
+fetch('/api/analytics/')
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('totalPatients').textContent = data.total_patients;
+    document.getElementById('totalRevenue').textContent = "₹" + data.total_revenue;
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: data.monthly_revenue.map(e => e.month.slice(0, 7)),
+        datasets: [{
+          label: 'Revenue',
+          data: data.monthly_revenue.map(e => e.total),
+          backgroundColor: 'rgba(0,123,255,0.2)',
+          borderColor: 'rgba(0,123,255,1)',
+          borderWidth: 2
+        }]
+      },
+    });
+  });
+</script>
+{% endblock %}

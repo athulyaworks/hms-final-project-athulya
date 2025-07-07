@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 800px;">
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h3 class="card-title">👤 Patient Details</h3>
+      <p><strong>Name:</strong> {{ patient.user.get_full_name }}</p>
+      <p><strong>Username:</strong> {{ patient.user.username }}</p>
+      <p><strong>Email:</strong> {{ patient.user.email }}</p>
+      <p><strong>Check-In Status:</strong>
+        {% if patient.is_checked_in %}
+          ✅ Checked-In
+        {% else %}
+          ❌ Not Checked-In
+        {% endif %}
+      </p>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="card-title">📅 Appointments</h5>
+      {% if appointments %}
+        <ul class="list-group">
+          {% for appt in appointments %}
+            <li class="list-group-item">
+              {{ appt.date }} at {{ appt.time }} with Dr. {{ appt.doctor.user.get_full_name }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No appointments found.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title">💰 Billing History</h5>
+      {% if invoices %}
+        <ul class="list-group">
+          {% for bill in invoices %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              Invoice #{{ bill.id }} - ₹{{ bill.total_amount }}
+              <span class="badge {% if bill.is_paid %}bg-success{% else %}bg-warning{% endif %}">
+                {{ bill.payment_status }}
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No bills found.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load custom_tags %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">My Patients</h2>
+
+    <!-- Search form -->
+    <form method="get" class="mb-3">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Search patients by name or username..." value="{{ query|default:'' }}">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+
+    {% if patients %}
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Doctor</th>  {# Show assigned doctor #}
+                    <th>Gender</th>
+                    <th>Age</th>
+                    <th>Contact</th>
+                    <th>Condition</th>
+                    <th>Prescriptions</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                <tr>
+                    <td>{{ patient.id }}</td>
+                    <td>
+                        {% if patient.user %}
+                            {{ patient.user.get_full_name|default:patient.user.username }}
+                        {% else %}
+                            <span class="text-danger">No User Linked</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if patient.assigned_doctor and patient.assigned_doctor.user %}
+                            {{ patient.assigned_doctor.user.get_full_name }}
+                        {% else %}
+                            <span class="text-muted">No doctor assigned</span>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ patient.gender|default:"-" }}</td>
+                    <td>
+                        {% if patient.age and patient.age > 0 %}
+                            {{ patient.age }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>{{ patient.contact_number|default:"-" }}</td>
+                    <td>{{ patient.medical_history|default:"-" }}</td>
+
+                    <td>
+                        {% with prescriptions=patient.hospital_prescriptions.all %}
+                            {% if prescriptions %}
+                                <ul class="mb-0 ps-3">
+                                    {% for prescription in prescriptions %}
+                                        <li>
+                                            {{ prescription.created_at|date:"M d, Y" }}
+                                            {% if prescription.prescription_file %}
+                                                - <a href="{{ prescription.prescription_file.url }}" target="_blank">View</a>
+                                            {% else %}
+                                                - <em>No file</em>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <em>No prescriptions</em>
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+
+                    <td>
+                        {% with appointment=latest_appointments|get_item:patient.id %}
+                            {% if appointment %}
+                                <a href="{% url 'hospital:prescription-upload' appointment.id %}" class="btn btn-sm btn-outline-primary mb-1 d-block">
+                                    Add / Edit Prescription
+                                </a>
+                            {% else %}
+                                <span class="text-muted d-block mb-1">No appointments</span>
+                            {% endif %}
+                        {% endwith %}
+
+                        <a href="{% url 'hospital:patient-edit' patient.id %}" class="btn btn-sm btn-outline-warning">
+                            Edit Patient Info
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="mt-3">
+            <strong>Total Patients: {{ patients|length }}</strong>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">No patients found.</div>
+    {% endif %}
+</div>
+{% endblock %}
