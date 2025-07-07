@@ -12,7 +12,9 @@
         <th>Patient</th>
         <th>Doctor</th>
         <th>Date Issued</th>
+        <th>Medicines</th>
         <th>Notes</th>
+        <th>Actions</th>  <!-- Added this column -->
       </tr>
     </thead>
     <tbody>
@@ -21,7 +23,28 @@
         <td>{{ prescription.patient.user.get_full_name }}</td>
         <td>{{ prescription.doctor.user.get_full_name }}</td>
         <td>{{ prescription.date_issued }}</td>
+        <td>
+          {% if prescription.items.all %}
+            <ul>
+              {% for item in prescription.items.all %}
+                <li>{{ item.medicine.name }} - {{ item.medicine.dosage }} 
+                  {% if item.quantity %} (Qty: {{ item.quantity }}) {% endif %}
+                  {% if item.instructions %} - {{ item.instructions }} {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            -
+          {% endif %}
+        </td>
         <td>{{ prescription.notes|default:"-" }}</td>
+
+        <td>
+          <a href="{% url 'billing:create-invoice-from-prescription' prescription.id %}" 
+             class="btn btn-sm btn-primary">
+            Create Invoice
+          </a>
+        </td>
       </tr>
       {% endfor %}
     </tbody>

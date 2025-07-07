@@ -2,7 +2,16 @@
 {% block content %}
 <div class="container mt-4" style="max-width: 600px;">
   <h2>Send SMS/Email Reminders</h2>
-  <form method="post">
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-success" role="alert">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post" action="{% url 'hospital:send-reminders' %}">
     {% csrf_token %}
     <p>This will send reminders to all patients with upcoming appointments and unpaid bills.</p>
     <button type="submit" class="btn btn-primary">Send Reminders</button>

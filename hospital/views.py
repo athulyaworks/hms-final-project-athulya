@@ -1,5 +1,6 @@
 from rest_framework import viewsets, permissions
-from hospital.models import Patient, Doctor, Appointment, Bed, InpatientRecord
+from hospital.models import Patient, Doctor, Appointment, Bed, InpatientRecord, WaitingListEntry
+from pharmacy.models import Prescription
 from .serializers import *
 from .utils import send_notification_email
 from rest_framework.authtoken.models import Token
@@ -12,43 +13,34 @@ from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from users.models import User 
-from .forms import AppointmentForm, PatientRegistrationForm
-from hospital.models import WaitingListEntry
+from .forms import AppointmentForm, PrescriptionForm
 from billing.models import Invoice
-from hospital.serializers import DoctorSerializer
+from hospital.serializers import DoctorSerializer, InpatientRecordSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.viewsets import ModelViewSet
-from hospital.serializers import InpatientRecordSerializer
 from django.db.models import Q
-from .forms import PatientForm
-from billing.models import Invoice  
-from rest_framework.permissions import AllowAny
-from django.views.generic import TemplateView
-from django.utils.timezone import now, timedelta
-from django.views.generic import ListView
-from hospital.models import Patient, Prescription, Appointment
-from django.views.generic import FormView
+from .forms import PatientForm, DailyTreatmentNoteForm, TreatmentForm
+from django.views.generic import TemplateView, ListView, FormView, UpdateView, CreateView
 from django.urls import reverse_lazy
-from hospital.forms import AssignDoctorForm
-from django.views.generic import UpdateView
+from hospital.forms import AssignDoctorForm, InpatientAdmissionForm, ProcedureForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from .models import Prescription
-from .forms import PrescriptionForm  
-from django.shortcuts import get_object_or_404
-from hospital.models import Appointment, Prescription, Doctor
-from django.core.exceptions import PermissionDenied
-from .models import InpatientRecord, DailyTreatmentNote, Treatment
-from .forms import DailyTreatmentNoteForm
-from .forms import TreatmentForm
-from .models import InpatientRecord, Procedure
-from .models import AdmissionRequest, Patient
-from hospital.forms import InpatientAdmissionForm, ProcedureForm
+from .models import InpatientRecord, DailyTreatmentNote, Treatment, Procedure, AdmissionRequest, Patient
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from django.views.generic.edit import CreateView
-from django.utils.decorators import method_decorator
+from django.utils.timezone import now, timedelta
+from django.core.exceptions import PermissionDenied
+from hospital.tasks import send_appointment_reminders, send_lab_report_notifications, send_bill_due_reminders
+from django.contrib.auth.decorators import login_required, user_passes_test
 
-
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from hospital.tasks import send_appointment_reminders_logic, send_bill_due_reminders_logic
+from hospital.utils import is_receptionist
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 
 def patient_edit_view(request, pk):
     patient = get_object_or_404(Patient, pk=pk)
@@ -62,7 +54,6 @@ def patient_edit_view(request, pk):
         form = PatientForm(instance=patient)
 
     return render(request, 'patients/patient_edit.html', {'form': form, 'patient': patient})
-
 
 
 
@@ -152,20 +143,20 @@ def is_receptionist(user):
 def receptionist_dashboard(request):
     return render(request, 'dashboards/receptionist_dashboard.html')
 
-@login_required
-@user_passes_test(is_receptionist)
-def manage_patient_registration(request):
-    if request.method == 'POST':
-        form = PatientRegistrationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Patient registered successfully!")
-            return redirect('receptionist-patient-register')
-        else:
-            messages.error(request, "Please fix the errors below.")
-    else:
-        form = PatientRegistrationForm()
-    return render(request, 'receptionist/manage_patient_registration.html', {'form': form})
+# @login_required
+# @user_passes_test(is_receptionist)
+# def manage_patient_registration(request):
+#     if request.method == 'POST':
+#         form = PatientRegistrationForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, "Patient registered successfully!")
+#             return redirect('receptionist-patient-register')
+#         else:
+#             messages.error(request, "Please fix the errors below.")
+#     else:
+#         form = PatientRegistrationForm()
+#     return render(request, 'receptionist/manage_patient_registration.html', {'form': form})
 
 
 @login_required
@@ -190,7 +181,7 @@ def toggle_patient_checkin(request, pk):
     patient = get_object_or_404(Patient, pk=pk)
     patient.is_checked_in = not patient.is_checked_in
     patient.save()
-    return redirect('patient-checkin-list')
+    return redirect('hospital:patient-checkin-list')
 
 
 
@@ -244,24 +235,25 @@ def remove_waiting_list_entry(request, pk):
     entry.delete()
     return redirect('waiting-list')
 
+
+
 @login_required
 @user_passes_test(is_receptionist)
 def send_reminders(request):
     if request.method == 'POST':
-        messages.success(request, "Reminders sent successfully!")
-        return redirect('send-reminders')
+        send_appointment_reminders_logic()
+        send_bill_due_reminders_logic()
+
+        messages.success(request, "Reminders sent successfully to patients with upcoming appointments and unpaid bills.")
+        return redirect('hospital:send-reminders')
+
     return render(request, 'receptionist/send_reminders.html')
-
-
 
 
 
 # ---resceduling and cancelling appointments----
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render, redirect
-from django.contrib import messages
-from django.core.exceptions import PermissionDenied
+
 
 def is_receptionist(user):
     return user.is_authenticated and hasattr(user, 'role') and user.role == 'receptionist'
@@ -313,21 +305,6 @@ def cancel_appointment(request, appointment_id):
 
 
 
-def send_reminders(request):
-    upcoming = Appointment.objects.filter(
-        date=now().date() + timedelta(days=1),
-        status='scheduled'
-    )
-    for appointment in upcoming:
-        patient_email = appointment.patient.user.email
-        doctor = appointment.doctor.user.get_full_name()
-        send_notification_email(
-            subject="Appointment Reminder",
-            message=f"Reminder: Your appointment with Dr. {doctor} is tomorrow at {appointment.time}.",
-            recipient_email=patient_email
-        )
-    messages.success(request, "Reminders sent.")
-    return redirect('hospital:appointments_list')
 
 
 
@@ -350,9 +327,17 @@ class DoctorPatientListView(LoginRequiredMixin, ListView):
             for patient in patients
         }
 
+        # Get recent prescriptions for these patients by this doctor
+        prescriptions = Prescription.objects.filter(
+            doctor__user=user,
+            patient__in=patients
+        ).order_by('-created_at')[:10]
+
         context['latest_appointments'] = latest_appointments
+        context['prescriptions'] = prescriptions
 
         return context
+
 
 
 
@@ -755,3 +740,18 @@ class PharmacistPatientListView(APIView):
     def get(self, request):
         patients = Patient.objects.select_related('user').all()
         return Response({'patients': patients})
+
+
+def cancel_appointment(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+
+    if request.method == 'POST':
+        appointment.status = 'cancelled'
+        appointment.save()
+        return redirect('hospital:appointments_list')
+
+    return render(request, 'appointments/cancel_appointment_confirm.html', {'appointment': appointment})
+
+from django.utils.timezone import now
+from datetime import timedelta
+

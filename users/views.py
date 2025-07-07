@@ -16,12 +16,27 @@ import requests
 from django.views import View
 from django.urls import reverse
 from hospital.models import Patient
-
 from django.utils import timezone
 from django.contrib import messages
 from hospital.models import AdmissionRequest
 from django.contrib.auth import login as auth_login
 from users.models import EmailOTP
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+from django.views.generic import TemplateView
+from django.shortcuts import redirect
+from django.contrib import messages
+from django.utils import timezone
+from labs.models import LabTest
+from hospital.models import Appointment, InpatientRecord, Patient
+from pharmacy.models import Prescription
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as auth_login
+from django.contrib import messages
+from .models import EmailOTP
+from django.core.mail import send_mail
+from django.conf import settings
 
 # Create your views here.
 
@@ -61,14 +76,32 @@ class CustomLoginView(LoginView):
 class HomePageView(TemplateView):
     template_name = 'home.html'
 
+
+from django.db import IntegrityError
+
 class RegisterView(FormView):
     template_name = 'registration/register.html'
     form_class = CustomUserCreationForm
     success_url = reverse_lazy('login')
 
     def form_valid(self, form):
-        form.save()
-        return super().form_valid(form)
+        try:
+            user = form.save(commit=False)
+            user.save()
+
+            if user.role == 'patient':
+                # Only create patient if not already created
+                if not hasattr(user, 'patient_profile'):
+                    Patient.objects.create(user=user)
+
+            messages.success(self.request, "Registration successful. Please log in.")
+            return super().form_valid(form)
+
+        except IntegrityError as e:
+            messages.error(self.request, f"Registration failed: {str(e)}")
+            return self.form_invalid(form)
+
+
 
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -93,16 +126,6 @@ class AdminDashboardView(TemplateView):
         return context
 
 
-
-
-from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
-from django.views.generic import TemplateView
-from django.shortcuts import redirect
-from django.contrib import messages
-from django.utils import timezone
-from labs.models import LabTest
-from hospital.models import Appointment, Prescription, InpatientRecord, Patient
 
 @method_decorator(login_required, name='dispatch')
 class DoctorDashboardView(TemplateView):
@@ -218,13 +241,7 @@ class ApiTokenLoginView(View):
         return render(request, self.template_name, {'token': token, 'error': error})
 
 
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate
-from django.contrib.auth import login as auth_login
-from django.contrib import messages
-from .models import EmailOTP
-from django.core.mail import send_mail
-from django.conf import settings
+
 
 def login_view(request):
     if request.method == 'POST':

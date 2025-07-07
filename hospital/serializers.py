@@ -1,11 +1,9 @@
 from rest_framework import serializers
-from .models import Patient, Doctor, Appointment, Bed, InpatientRecord
+from .models import Patient, Doctor, Appointment, Bed, InpatientRecord, ContactMessage
 from users.models import User
 from users.serializers import UserSerializer
 
-
-
-        
+       
 class PatientSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
 
@@ -14,14 +12,10 @@ class PatientSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'age', 'gender', 'contact_number', 'address', 'is_inpatient', 'medical_history']
 
 
-        
-from rest_framework import serializers
-from .models import Doctor
-from users.serializers import UserSerializer
 
 class DoctorSerializer(serializers.ModelSerializer):
     user = UserSerializer()
-    photo = serializers.ImageField(required=False, allow_null=True)
+    
 
     class Meta:
         model = Doctor
@@ -67,8 +61,6 @@ class AppointmentSerializer(serializers.ModelSerializer):
             'notes',
         ]
 
-
-
 class BedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bed
@@ -79,9 +71,6 @@ class InpatientRecordSerializer(serializers.ModelSerializer):
         model = InpatientRecord
         fields = '__all__'
 
-
-
-from .models import ContactMessage
 
 class ContactMessageSerializer(serializers.ModelSerializer):
     class Meta:

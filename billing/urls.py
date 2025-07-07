@@ -22,13 +22,10 @@ urlpatterns = [
     # Optional homepage for billing module
     path('', billing_home, name='billing_home'),
 
-
     path('my-bills/', my_bills, name='my-bills'),
-    # path('pay/<int:invoice_id>/', create_payment, name='create-payment'),
-    # path('payment-callback/', payment_callback, name='payment-callback'),
-
 
     path('mock-payment/<int:invoice_id>/', mock_payment, name='mock-payment'),
-    path('invoice/from-prescription/', create_invoice_from_prescription, name='create-invoice-from-prescription'),
 
+    path('invoice/from-prescription/<int:prescription_id>/', create_invoice_from_prescription, name='create-invoice-from-prescription'),
 ]
+

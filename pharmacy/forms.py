@@ -20,7 +20,7 @@ PrescriptionItemFormSet = forms.inlineformset_factory(
 class PrescriptionForm(forms.ModelForm):
     class Meta:
         model = Prescription
-        fields = ['patient', 'doctor', 'notes']  # date_issued is auto_now_add, no need to include
+        fields = ['appointment', 'doctor', 'patient', 'medicines', 'comments', 'prescription_file']
 
 from .models import Medicine
 

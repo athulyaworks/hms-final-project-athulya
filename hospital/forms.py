@@ -3,8 +3,19 @@ from .models import Appointment, Doctor, Patient
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 from users.models import User  
-
 from .models import Treatment
+from django import forms
+from django.contrib.auth import get_user_model
+from hospital.models import Patient
+from .models import ContactMessage
+from django import forms
+from .models import Patient, Doctor, Bed
+from .models import Procedure, InpatientRecord
+from pharmacy.models import Prescription
+from django import forms
+from labs.models import LabTest
+from hospital.models import Patient
+from .models import DailyTreatmentNote
 
 User = get_user_model()
 
@@ -55,87 +66,81 @@ class AppointmentForm(forms.ModelForm):
 
 
 
-from django import forms
-from django.contrib.auth import get_user_model
-from hospital.models import Patient
-
-User = get_user_model()
-
-class PatientRegistrationForm(forms.ModelForm):
-    # User info fields
-    username = forms.CharField(max_length=150, required=True)
-    email = forms.EmailField(required=True)
-    first_name = forms.CharField(max_length=30, required=True)
-    last_name = forms.CharField(max_length=150, required=True)
-    password = forms.CharField(widget=forms.PasswordInput, required=True)
-    password2 = forms.CharField(widget=forms.PasswordInput, label="Confirm Password", required=True)
-
-    class Meta:
-        model = Patient
-        fields = ['age', 'gender', 'contact_number', 'address', 'medical_history', 'is_inpatient']
-
-    def clean_username(self):
-        username = self.cleaned_data.get('username')
-        if User.objects.filter(username=username).exists():
-            raise forms.ValidationError("Username already exists.")
-        return username
-
-    def clean(self):
-        cleaned_data = super().clean()
-        username = cleaned_data.get('username')
-
-        # Check if user exists and if patient exists for that user
-        if username:
-            try:
-                user = User.objects.get(username=username)
-                if Patient.objects.filter(user=user).exists():
-                    raise forms.ValidationError("Patient profile for this username already exists.")
-            except User.DoesNotExist:
-                pass  # no user, so okay to proceed
-
-        password = cleaned_data.get("password")
-        password2 = cleaned_data.get("password2")
-        if password and password2 and password != password2:
-            raise forms.ValidationError("Passwords do not match.")
-
-        return cleaned_data
 
 
-    def save(self, commit=True):
-        username = self.cleaned_data['username']
-        email = self.cleaned_data['email']
-        first_name = self.cleaned_data['first_name']
-        last_name = self.cleaned_data['last_name']
-        password = self.cleaned_data['password']
+# User = get_user_model()
 
-        # Create user if not exists
-        user, created = User.objects.get_or_create(
-            username=username,
-            defaults={
-                'email': email,
-                'first_name': first_name,
-                'last_name': last_name,
-                'role': 'patient',
-            }
-        )
-        if created:
-            user.set_password(password)
-            user.save()
+# class PatientRegistrationForm(forms.ModelForm):
+#     # User info fields
+#     username = forms.CharField(max_length=150, required=True)
+#     email = forms.EmailField(required=True)
+#     first_name = forms.CharField(max_length=30, required=True)
+#     last_name = forms.CharField(max_length=150, required=True)
+#     password = forms.CharField(widget=forms.PasswordInput, required=True)
+#     password2 = forms.CharField(widget=forms.PasswordInput, label="Confirm Password", required=True)
 
-        # Now create Patient linked to user
-        patient = super().save(commit=False)
-        patient.user = user
+#     class Meta:
+#         model = Patient
+#         fields = ['age', 'gender', 'contact_number', 'address', 'medical_history', 'is_inpatient']
 
-        if commit:
-            patient.save()
+#     def clean_username(self):
+#         username = self.cleaned_data.get('username')
+#         if User.objects.filter(username=username).exists():
+#             raise forms.ValidationError("Username already exists.")
+#         return username
 
-        return patient
+#     def clean(self):
+#         cleaned_data = super().clean()
+#         username = cleaned_data.get('username')
+
+#         # Check if user exists and if patient exists for that user
+#         if username:
+#             try:
+#                 user = User.objects.get(username=username)
+#                 if Patient.objects.filter(user=user).exists():
+#                     raise forms.ValidationError("Patient profile for this username already exists.")
+#             except User.DoesNotExist:
+#                 pass  # no user, so okay to proceed
+
+#         password = cleaned_data.get("password")
+#         password2 = cleaned_data.get("password2")
+#         if password and password2 and password != password2:
+#             raise forms.ValidationError("Passwords do not match.")
+
+#         return cleaned_data
 
 
+#     def save(self, commit=True):
+#         username = self.cleaned_data['username']
+#         email = self.cleaned_data['email']
+#         first_name = self.cleaned_data['first_name']
+#         last_name = self.cleaned_data['last_name']
+#         password = self.cleaned_data['password']
 
-from django import forms
-from labs.models import LabTest
-from hospital.models import Patient
+#         # Create user if not exists
+#         user, created = User.objects.get_or_create(
+#             username=username,
+#             defaults={
+#                 'email': email,
+#                 'first_name': first_name,
+#                 'last_name': last_name,
+#                 'role': 'patient',
+#             }
+#         )
+#         if created:
+#             user.set_password(password)
+#             user.save()
+
+#         # Now create Patient linked to user
+#         patient = super().save(commit=False)
+#         patient.user = user
+
+#         if commit:
+#             patient.save()
+
+#         return patient
+
+
 
 class LabTestRequestForm(forms.ModelForm):
     class Meta:
@@ -161,7 +166,7 @@ class AssignDoctorForm(forms.Form):
     doctor = forms.ModelChoiceField(queryset=Doctor.objects.all())
 
 
-from .models import Prescription
+
 
 class PrescriptionForm(forms.ModelForm):
     class Meta:
@@ -170,7 +175,6 @@ class PrescriptionForm(forms.ModelForm):
 
 
 
-from .models import DailyTreatmentNote
 
 class DailyTreatmentNoteForm(forms.ModelForm):
     class Meta:
@@ -187,7 +191,6 @@ class TreatmentForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
         }
-from .models import Procedure, InpatientRecord
 
 class ProcedureForm(forms.ModelForm):
     class Meta:
@@ -208,8 +211,6 @@ class InpatientAdmissionForm(forms.ModelForm):
         self.fields['doctor'].queryset = Doctor.objects.all()
         self.fields['doctor'].required = True  # enforce required doctor
 
-from django import forms
-from .models import Patient, Doctor, Bed
 
 class PatientForm(forms.ModelForm):
     assigned_doctor = forms.ModelChoiceField(
@@ -226,8 +227,6 @@ class PatientForm(forms.ModelForm):
             'assigned_doctor',
         ]
 
-
-from .models import ContactMessage
 
 class ContactForm(forms.ModelForm):
     class Meta:

@@ -19,7 +19,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
-                    <th>Doctor</th>  {# Show assigned doctor #}
+                    <th>Doctor</th>
                     <th>Gender</th>
                     <th>Age</th>
                     <th>Contact</th>
@@ -60,14 +60,14 @@
                     <td>{{ patient.medical_history|default:"-" }}</td>
 
                     <td>
-                        {% with prescriptions=patient.hospital_prescriptions.all %}
+                        {% with prescriptions=patient.prescriptions.all %}
                             {% if prescriptions %}
                                 <ul class="mb-0 ps-3">
                                     {% for prescription in prescriptions %}
                                         <li>
                                             {{ prescription.created_at|date:"M d, Y" }}
                                             {% if prescription.prescription_file %}
-                                                - <a href="{{ prescription.prescription_file.url }}" target="_blank">View</a>
+                                                - <a href="{{ prescription.prescription_file.url }}" target="_blank" rel="noopener noreferrer">View</a>
                                             {% else %}
                                                 - <em>No file</em>
                                             {% endif %}

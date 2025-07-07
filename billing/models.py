@@ -17,12 +17,11 @@ class Invoice(models.Model):
     inpatient_record = models.ForeignKey(InpatientRecord, on_delete=models.SET_NULL, null=True, blank=True)
     prescription = models.ForeignKey(Prescription, on_delete=models.SET_NULL, null=True, blank=True)
     lab_test = models.ForeignKey(LabTest, on_delete=models.SET_NULL, null=True, blank=True)
-
+    due_date = models.DateField(null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     is_paid = models.BooleanField(default=False)
     description = models.TextField(blank=True)
-    razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, default='cash')
     insurance_claimed = models.BooleanField(default=False)
     payment_status = models.CharField(max_length=20, default='Pending')

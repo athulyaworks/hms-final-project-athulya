@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Create Invoice from Prescription #{{ prescription.id }}</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <h4>Invoice Items</h4>
+    {{ formset.management_form }}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Medicine</th>
+          <th>Quantity</th>
+          <th>Price per Unit</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for form in formset.forms %}
+        <tr>
+          <td>{{ form.medicine }}</td>
+          <td>{{ form.quantity }}</td>
+          <td>{{ form.price_per_unit }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-primary">Create Invoice</button>
+    <a href="{% url 'billing:manage-bills' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

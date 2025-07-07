@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.core.mail import send_mail
 import json
-
+from pharmacy.models import Prescription
 
 #  DRF ViewSet
 class InvoiceViewSet(viewsets.ModelViewSet):
@@ -135,11 +135,14 @@ def create_invoice_from_prescription(request, prescription_id):
             invoice = form.save(commit=False)
             invoice.prescription = prescription
             invoice.patient = prescription.patient
+
+            invoice.total_amount = 0  
             invoice.save()
 
             formset.instance = invoice
             formset.save()
 
+            # Calculate total after items saved
             total = sum(item.quantity * item.price_per_unit for item in invoice.items.all())
             invoice.total_amount = total
             invoice.save()
@@ -148,20 +151,19 @@ def create_invoice_from_prescription(request, prescription_id):
             return redirect('billing:manage-bills')
         else:
             messages.error(request, "Please fix the errors.")
-    else:
+
         form = InvoiceForm(initial={
             'patient': prescription.patient,
             'prescription': prescription,
         })
 
-        
         formset = InvoiceItemFormSet(initial=[
             {
                 'medicine': item.medicine,
                 'quantity': item.quantity,
                 'price_per_unit': item.medicine.price,
             }
-            for item in prescription.prescriptionitem_set.all()
+            for item in prescription.items.all()  # use correct related_name 'items'
         ])
 
     return render(request, 'billing/create_invoice_from_prescription.html', {

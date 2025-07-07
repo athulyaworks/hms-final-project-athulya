@@ -29,9 +29,11 @@
                 <a href="{% url 'pharmacy:prescription-list' %}" class="btn btn-outline-info">
                     📋 View Prescriptions
                 </a>
-                <a href="{% url 'billing:create-invoice-from-prescription' %}" class="btn btn-outline-success">
-                    💰 Create Invoice from Prescription
-                </a>
+               <a href="{% url 'pharmacy:prescription-list' %}" class="btn btn-outline-success">
+    💰 Create Invoice from Prescription
+</a>
+
+
                 <a href="{% url 'billing:manage-bills' %}" class="btn btn-outline-secondary">
                     🧾 Manage Bills
                 </a>

@@ -4,7 +4,7 @@ from hospital.views import (
     patient_edit_view,
     appointment_list,
     appointment_list_admin,
-    manage_patient_registration,
+    # manage_patient_registration,
     toggle_patient_checkin,
     patient_checkin_list,
     waiting_list_view,
@@ -33,6 +33,7 @@ from hospital.views import (
     ContactHTMLView,
     DoctorListHTMLView,
     PatientListHTMLView, 
+    
     )
 
 from hospital.views_api import(
@@ -60,7 +61,7 @@ urlpatterns = [
 
     # Receptionist
     path('receptionist/dashboard/', ReceptionistDashboardView.as_view(), name='receptionist-dashboard'),
-    path('receptionist/patients/register/', manage_patient_registration, name='receptionist-patient-register'),
+    # path('receptionist/patients/register/', manage_patient_registration, name='receptionist-patient-register'),
 
     # Patient check-in
     path('patients/checkin/', patient_checkin_list, name='patient-checkin-list'),
@@ -115,5 +116,6 @@ urlpatterns = [
 
 
     path('contact/', ContactHTMLView.as_view(), name='contact'),
+    
 
 ] 

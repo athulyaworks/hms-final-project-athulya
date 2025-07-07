@@ -51,9 +51,10 @@
       <!-- Recent Prescriptions -->
       <div class="mb-5">
         <h4>Recent Prescriptions</h4>
-        {% if prescriptions %}
+        {% if recent_prescriptions %}
           <ul class="list-group">
-            {% for prescription in prescriptions %}
+            {% for prescription in recent_prescriptions %}
+
               <li class="list-group-item">
                 <strong>Patient:</strong> {{ prescription.patient.user.get_full_name }}<br>
                 <strong>Date:</strong> {{ prescription.created_at|date:"M d, Y" }}<br>

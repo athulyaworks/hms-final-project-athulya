@@ -5,6 +5,7 @@ from .models import Medicine, Prescription
 from .serializers import MedicineSerializer, PrescriptionSerializer
 from .forms import PrescriptionForm, PrescriptionItemFormSet
 
+
 class MedicineViewSet(viewsets.ModelViewSet):
     queryset = Medicine.objects.all()
     serializer_class = MedicineSerializer
@@ -46,8 +47,9 @@ def medicine_list(request):
 @login_required
 @user_passes_test(is_pharmacist)
 def prescription_list(request):
-    prescriptions = Prescription.objects.all()
+    prescriptions = Prescription.objects.all().select_related('doctor__user', 'patient__user')
     return render(request, 'prescriptions/prescription_list.html', {'prescriptions': prescriptions})
+
 
 from django.contrib import messages
 from django.db import transaction

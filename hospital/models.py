@@ -89,10 +89,10 @@ class InpatientRecord(models.Model):
     number = models.CharField(max_length=20, unique=True, null=True,blank=True)
     is_occupied = models.BooleanField(default=False)
 
-    # Assign nurses or other staff involved in inpatient care
+    
     assigned_staff = models.ManyToManyField(
         User,
-        limit_choices_to={'role__in': ['nurse', 'staff']},  # adjust according to your User model roles
+        limit_choices_to={'role__in': ['receptionist', 'pharmacist']}, 
         blank=True,
         related_name='inpatient_assignments'
     )
@@ -174,16 +174,6 @@ class WaitingListEntry(models.Model):
         ordering = ['created_at']
 
 
-class Prescription(models.Model):
-    appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE)
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='hospital_prescriptions')
-    patient = models.ForeignKey('Patient', on_delete=models.CASCADE, related_name='hospital_prescriptions')
-    comments = models.TextField(blank=True)
-    prescription_file = models.FileField(upload_to='prescriptions/', blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Prescription for {self.patient} on {self.appointment.date}"
 
 class AdmissionRequest(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)

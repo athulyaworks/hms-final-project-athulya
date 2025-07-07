@@ -14,18 +14,28 @@
                 <th>Specialization</th>
                 <th>Date</th>
                 <th>Time</th>
+                <th>Status</th>  <!-- ✅ Added -->
                 <th>Notes</th>
             </tr>
         </thead>
         <tbody>
             {% for appointment in appointments %}
-            <tr>
+            <tr class="{% if appointment.status == 'cancelled' %}table-danger{% endif %}">
                 <td>{{ forloop.counter }}</td>
                 <td>{{ appointment.patient.user.get_full_name }}</td>
                 <td>Dr. {{ appointment.doctor.user.get_full_name }}</td>
                 <td>{{ appointment.doctor.specialization }}</td>
                 <td>{{ appointment.date }}</td>
                 <td>{{ appointment.time }}</td>
+                <td>
+                    {% if appointment.status == 'cancelled' %}
+                        <span class="badge bg-danger">Cancelled</span>
+                    {% elif appointment.status == 'completed' %}
+                        <span class="badge bg-success">Completed</span>
+                    {% else %}
+                        <span class="badge bg-primary">Scheduled</span>
+                    {% endif %}
+                </td>
                 <td>{{ appointment.notes|default:"-" }}</td>
             </tr>
             {% endfor %}

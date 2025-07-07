@@ -37,10 +37,10 @@
           💰 Manage Billing
         </a>
 
-        <!-- Inpatient Management -->
+        <!-- Inpatient Management
         <a href="{% url 'hospital:admin_inpatients' %}" class="list-group-item list-group-item-action">
           🛏️ Inpatient Records
-        </a>
+        </a> -->
         <a href="{% url 'hospital:admin_beds' %}" class="list-group-item list-group-item-action">
           🚪 Bed Availability
         </a>
@@ -79,11 +79,11 @@
                   </td>
                   <td>
                     {% if not req.is_processed %}
-                      <form method="post" action="{% url 'process-admission-request' req.id 'accept' %}">
+                      <form method="post" action="{% url 'hospital:process-admission-request' req.id 'accept' %}">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-sm btn-success">Accept</button>
                       </form>
-                      <form method="post" action="{% url 'process-admission-request' req.id 'reject' %}">
+                      <form method="post" action="{% url 'hospital:process-admission-request' req.id 'reject' %}">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-sm btn-danger">Reject</button>
                       </form>
