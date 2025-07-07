@@ -43,7 +43,7 @@ urlpatterns = [
     path('api/users/', include('users.urls_api')),
     path('api/hospital/', include('hospital.urls_api')),
     path('api/labs/', include(('labs.urls_api', 'labs_api'), namespace='labs_api')),
-    path('api/pharmacy/', include(('pharmacy.urls', 'pharmacy_api'), namespace='pharmacy_api')),
+    path('api/pharmacy/', include(('pharmacy.urls_api', 'pharmacy_api'), namespace='pharmacy_api')),
     path('api/billing/', include('billing.urls')),
     path('api/notifications/', include('billing.urls_api')),
     path('api/global/', include('api.urls')),

@@ -30,19 +30,12 @@ class CustomUserCreationForm(UserCreationForm):
         if commit:
             user.save()
 
-            # Create patient profile only if not exists
-            try:
-                if not hasattr(user, 'patient_profile'):
-                    Patient.objects.create(
-                        user=user,
-                        age=self.cleaned_data['age'],
-                        gender=self.cleaned_data['gender'],
-                        contact_number=self.cleaned_data['contact_number'],
-                        address=self.cleaned_data['address'],
-                    )
-            except IntegrityError:
-                # Optional: Handle duplicate creation
-                pass
+            patient_profile, created = Patient.objects.get_or_create(user=user)
+            patient_profile.age = self.cleaned_data['age']
+            patient_profile.gender = self.cleaned_data['gender']
+            patient_profile.contact_number = self.cleaned_data['contact_number']
+            patient_profile.address = self.cleaned_data['address']
+            patient_profile.save()
 
         return user
     

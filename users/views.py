@@ -86,13 +86,7 @@ class RegisterView(FormView):
 
     def form_valid(self, form):
         try:
-            user = form.save(commit=False)
-            user.save()
-
-            if user.role == 'patient':
-                # Only create patient if not already created
-                if not hasattr(user, 'patient_profile'):
-                    Patient.objects.create(user=user)
+            user = form.save()  #form handle 
 
             messages.success(self.request, "Registration successful. Please log in.")
             return super().form_valid(form)
@@ -100,6 +94,7 @@ class RegisterView(FormView):
         except IntegrityError as e:
             messages.error(self.request, f"Registration failed: {str(e)}")
             return self.form_invalid(form)
+
 
 
 

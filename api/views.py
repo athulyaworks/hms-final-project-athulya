@@ -16,7 +16,7 @@ def analytics_summary(request):
     outpatients = total_patients - inpatients
     total_doctors = Doctor.objects.count()
     appointments_handled = Appointment.objects.count()
-    total_revenue = Invoice.objects.filter(is_paid=True).aggregate(Sum('total_amount'))['total_amount_sum'] or 0
+    total_revenue = Invoice.objects.filter(is_paid=True).aggregate(total=Sum('total_amount'))['total'] or 0
     low_stock_medicines = list(Medicine.objects.filter(stock__lte=10).values('name', 'stock'))
 
     # Monthly Revenue
